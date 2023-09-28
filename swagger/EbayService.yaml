@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: SOA LAB 1
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Dev server
+
+paths:
+  # Второй веб-сервис
+  /ebay/filter/price/{price-from}/{price-to}:
+    get:
+      tags:
+        - Second Web Service
+      summary: Возвращает продукцию в заданном диапазоне цен
+      parameters:
+        - name: price-from
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: price-to
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: Успешный ответ с продуктами
+          content:
+            application/xml:
+              schema:
+                $ref: "./ProductService.yaml#/components/schemas/Products"
+        '400':
+          description: Неправильные параметры запроса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: price-from и price-to должны быть float
+                  time:
+                    type: string
+                    format: date-time
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+
+  /ebay/filter/unit-of-measure/{unit-of-measure}:
+    get:
+      tags:
+        - Second Web Service
+      summary: Возвращает продукцию с заданным unitOfMeasure
+      parameters:
+        - name: unit-of-measure
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - METERS
+              - SQUARE_METERS
+              - PCS
+              - LITERS
+              - MILLILITERS
+      responses:
+        '200':
+          description: Успешный ответ с продуктами
+          content:
+            application/xml:
+              schema:
+                $ref: "./ProductService.yaml#/components/schemas/Products"
+        '400':
+          description: Неправильные параметры запроса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: unitOfMeasure должен соответствовать одному из перечисленных значений
+                  time:
+                    type: string
+                    format: date-time
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time

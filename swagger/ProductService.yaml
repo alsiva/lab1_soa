@@ -1,0 +1,733 @@
+openapi: 3.0.3
+info:
+  title: SOA LAB 1
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Dev server
+
+paths:
+  /products:
+    get:
+      summary: Метод получения списка продуктов
+      tags:
+        - Product
+      operationId: getAllProducts
+      parameters:
+        - name: sort
+          in: query
+          description: Массив полей для сортировки. "!" означает сортировку в обратном порядке
+          required: false
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              default: id
+              enum:
+                - product_id
+                - name
+                - coordinate_x
+                - coordinate_y
+                - creationDate
+                - price
+                - manufactureCost
+                - unitOfMeasure
+                - org_id
+                - org_name
+                - org_fullName
+                - org_annualTurnover
+                - org_type
+                - postalAddress_zipcode
+                - desc_product_id
+                - desc_name
+                - desc_coordinate_x
+                - desc_coordinate_y
+                - desc_creationDate
+                - desc_price
+                - desc_manufactureCost
+                - desc_unitOfMeasure
+                - desc_org_id
+                - desc_org_name
+                - desc_org_fullName
+                - desc_org_annualTurnover
+                - desc_org_type
+                - desc_postalAddress_zipcode
+
+        - name: filter
+          in: query
+          required: false
+          description: Массив полей для фильтрации
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              example: id==1
+              pattern: '^(id|name|coordinates\.x|coordinates\.y|creationDate|location\.id|location\.x|location\.y|location\.name|distance)(==|!=|>|<|>=|<=)'
+
+        - name: page
+          in: query
+          required: false
+          description: Обозначает номер страницы, которую вывести, при условии, что работает пагинация. Если параметр 'pagesCount' не указан, то по умолчанию количество страниц равно 5. Если оба параметра не указаны, то возвращается полный список.
+          schema:
+            type: integer
+            default: 1
+            minimum: 0
+
+        - name: pagesCount
+          in: query
+          required: false
+          description: Обозначает количество страниц, на которые произвести разбиение, при условии, что работает пагинация. Если параметр 'page' не указан, то по умолчанию отобразится 1-ая страница. Если оба параметра не указаны, то возвращается полный список.
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+
+      responses:
+        '200':
+          description: Успешный ответ со списком продуктов
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Products"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+    post:
+      summary: Метод добавления продукта
+      operationId: addProduct
+      tags:
+        - Product
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        '200':
+          description: Метод возвращает продукт, которую мы только что создали
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '400':
+          description: Неверные входные данные для продукта
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Имя продукта не можем быть пустым !
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+
+
+  /products/{product_id}:
+    get:
+      tags:
+        - Product
+      summary: Метод получения продукта по идентификатору
+      operationId: getProductById
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный ответ с продуктом
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '400':
+          description: Неверный параметр
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: ID должен быть неотрицательным
+                  time:
+                    type: string
+                    format: date-time
+
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+    put:
+      tags:
+        - Product
+      summary: Метод изменения продукта по идентификатору
+      operationId: updateProductById
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/Product"
+
+      responses:
+        '200':
+          description: Успешный ответ с продуктом
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '400':
+          description: Неверные входные данные
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Имя продукта не должно быть пустым
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+
+    delete:
+      tags:
+        - Product
+      summary: Метод удаления продукта по идентификатору
+      operationId: deleteProductById
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Успешный ответ с удалённым продуктом
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '400':
+          description: Неверное значение ID
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Неверное значение ID
+                  time:
+                    type: string
+                    format: date-time
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+  #Дополнительные операции
+
+  /products?manufactureCost=<cost>:
+    delete:
+      tags:
+        - Product ExtraOps
+      summary: Метод удаления продукта по полю manufactureCost
+      operationId: deleteProductByManufactureCost
+      parameters:
+        - name: manufactureCost
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Успешный ответ с удалённым продуктом
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '400':
+          description: Неверное значение manufactureCost
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 400
+                  message:
+                    type: string
+                    example: Неверное значение manufactureCost
+                  time:
+                    type: string
+                    format: date-time
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+
+  /products?max_unitOfMeasure:
+    get:
+      tags:
+        - Product ExtraOps
+      summary: Метод получения продукта с максимальным unitOfMeasure
+      operationId: getProductByMax_UnitOfMeasure
+      responses:
+        '200':
+          description: Успешный ответ с удалённым продуктом
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+  /products?MaxAnnualTurnover=<value>:
+    get:
+      tags:
+        - Product ExtraOps
+      summary: Метод возвращает продукты, значения поля manufacturer которых меньше указанного
+      operationId: getProductsByLess_ManufacturerAnnualTurnover
+      parameters:
+        - name: AnnualTurnover
+          in: path
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: Успешный ответ с продуктами
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Products"
+        '400':
+          description: Неверное значение AnnualTurnover
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 400
+                  message:
+                    type: string
+                    example: Неверное значение AnualTurnover
+                  time:
+                    type: string
+                    format: date-time
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 500
+                  message:
+                    type: string
+                    example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+
+
+components:
+  schemas:
+    Product:
+      type: object
+      xml:
+        name: 'Product'
+      properties:
+        product_id:
+          # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+          type: integer
+          nullable: false
+          example: 1
+        name:
+          # Поле не может быть null, Строка не может быть пустой
+          type: string
+          nullable: false
+          minLength: 1
+          example: Ice cream
+        coordinates:
+          # Поле не может быть null
+          type: object
+          nullable: false
+          properties:
+            x:
+              type: integer
+              nullable: false
+              example: 10
+            y:
+              type: integer
+              nullable: false
+              example: 20
+        creationDate:
+          # Поле не может быть null, Значение этого поля должно генерироваться автоматически
+          type: string
+          format: date-time
+          example: "2023-09-08T15:31:35.712Z"
+          nullable: false
+        price:
+          # Поле может быть null, Значение поля должно быть больше 0
+          type: number
+          nullable: true
+          format: float
+          minimum: 1
+        manufactureCost:
+          # Поле может быть null
+          type: integer
+          format: int64
+          example: 300
+          nullable: true
+        unitOfMeasure:
+          # Поле может быть null
+          type: string
+          nullable: true
+          example: METERS
+          enum:
+            - METERS
+            - SQUARE_METERS
+            - PCS
+            - LITERS
+            - MILLILITERS
+        organization:
+          type: object
+          # Поле не может быть null
+          nullable: false
+          properties:
+            org_id:
+              # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+              type: integer
+              format: int32
+              example: 3
+              nullable: true
+              minimum: 1
+            name:
+              # Поле не может быть null, Строка не может быть пустой
+              type: string
+              example: "Егор"
+              nullable: false
+              minLength: 1
+            full_name:
+              # Поле не может быть null
+              type: string
+              example: "Егор Кривоносов Дмитриевич"
+              nullable: false
+            annualTurnover:
+              # Поле не может быть null, Значение поля должно быть больше 0
+              type: number
+              format: float
+              nullable: false
+              minimum: 1
+            org_type:
+              # Поле не может быть null
+              type: string
+              example: COMMERCIAL
+              nullable: false
+              enum:
+                - COMMERCIAL
+                - GOVERNMENT
+                - TRUST
+                - PRIVATE_LIMITED_COMPANY
+                - OPEN_JOINT_STOCK_COMPANY
+            postalAddress:
+              # Поле может быть null
+              type: object
+              nullable: true
+              properties:
+                zipcode:
+                  type: string
+                  example: 63101
+    Product1:
+      type: object
+      xml:
+        name: 'Product1'
+      properties:
+        product_id:
+          # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+          type: integer
+          nullable: false
+          example: 2
+        name:
+          # Поле не может быть null, Строка не может быть пустой
+          type: string
+          nullable: false
+          minLength: 1
+          example: Sandwich
+        coordinates:
+          # Поле не может быть null
+          type: object
+          nullable: false
+          properties:
+            x:
+              type: integer
+              nullable: false
+              example: 23
+            y:
+              type: integer
+              nullable: false
+              example: 47
+        creationDate:
+          # Поле не может быть null, Значение этого поля должно генерироваться автоматически
+          type: string
+          format: date-time
+          example: "2023-09-08T15:31:35.712Z"
+          nullable: false
+        price:
+          # Поле может быть null, Значение поля должно быть больше 0
+          type: number
+          nullable: true
+          format: float
+          minimum: 1
+          example: 250
+        manufactureCost:
+          # Поле может быть null
+          type: integer
+          format: int64
+          nullable: true
+          example: 150
+        unitOfMeasure:
+          # Поле может быть null
+          type: string
+          nullable: true
+          example: PCS
+          enum:
+            - METERS
+            - SQUARE_METERS
+            - PCS
+            - LITERS
+            - MILLILITERS
+        organization:
+          type: object
+          # Поле не может быть null
+          nullable: false
+          properties:
+            org_id:
+              # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+              type: integer
+              format: int32
+              example: 1
+              nullable: true
+              minimum: 1
+            name:
+              # Поле не может быть null, Строка не может быть пустой
+              type: string
+              example: "alsiva co"
+              nullable: false
+              minLength: 1
+            full_name:
+              # Поле не может быть null
+              type: string
+              example: "Alsiva Company of Sandwiches"
+              nullable: false
+            annualTurnover:
+              # Поле не может быть null, Значение поля должно быть больше 0
+              type: number
+              format: float
+              nullable: false
+              minimum: 1
+              example: 10000
+            org_type:
+              # Поле не может быть null
+              type: string
+              example: OPEN_JOINT_STOCK_COMPANY
+              nullable: false
+              enum:
+                - COMMERCIAL
+                - GOVERNMENT
+                - TRUST
+                - PRIVATE_LIMITED_COMPANY
+                - OPEN_JOINT_STOCK_COMPANY
+            postalAddress:
+              # Поле может быть null
+              type: object
+              nullable: true
+              properties:
+                zipcode:
+                  type: string
+                  example: 90003
+    Products:
+      type: array
+      xml:
+        name: 'Products'
+        wrapped: true
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/Product"
+          - $ref: "#/components/schemas/Product1"
