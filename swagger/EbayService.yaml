@@ -52,6 +52,27 @@ paths:
                   time:
                     type: string
                     format: date-time
+
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
+                  time:
+                    type: string
+                    format: date-time
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -72,6 +93,27 @@ paths:
                     type: string
                     format: date-time
 
+        '503':
+          description: Не могу достучаться до первого сервиса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 503
+                  message:
+                    type: string
+                    example: Не могу достучаться до первого сервиса
+                  time:
+                    type: string
+                    format: date-time
+
+
 
 
   /ebay/filter/unit-of-measure/{unit-of-measure}:
@@ -91,6 +133,7 @@ paths:
               - PCS
               - LITERS
               - MILLILITERS
+            pattern: '^(METERS|SQUARE_METERS|PCS|LITERS|MILLILITERS)/gi'
       responses:
         '200':
           description: Успешный ответ с продуктами
@@ -117,6 +160,27 @@ paths:
                   time:
                     type: string
                     format: date-time
+
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
+                  time:
+                    type: string
+                    format: date-time
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -133,6 +197,25 @@ paths:
                   message:
                     type: string
                     example: Внутренняя ошибка сервера
+                  time:
+                    type: string
+                    format: date-time
+        '503':
+          description: Не могу достучаться до первого сервиса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 503
+                  message:
+                    type: string
+                    example: Не могу достучаться до первого сервиса
                   time:
                     type: string
                     format: date-time

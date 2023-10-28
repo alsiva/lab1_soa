@@ -57,13 +57,14 @@ paths:
         - name: filter
           in: query
           required: false
-          description: Массив полей для фильтрации
+          description: Массив полей для фильтрации. Вы можете указать id, name coordinates_x, coordinates_y, location_id, location_x, location_y, location_name, distance. После одного из этих полей вы указываете символ сравнения (==) (!=) (>) (<) (>=) (<=).
           explode: true
           schema:
             type: array
             items:
               type: string
               example: id==1
+              required: true
               pattern: '^(id|name|coordinates\.x|coordinates\.y|creationDate|location\.id|location\.x|location\.y|location\.name|distance)(==|!=|>|<|>=|<=)'
 
         - name: page
@@ -91,6 +92,46 @@ paths:
             application/xml:
               schema:
                 $ref: "#/components/schemas/Products"
+
+        '400':
+          description: Вы должны были указать параметры сортировки и фильтрации в соответствии с требованиями, которые я вам указал
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Вы должны были указать параметры сортировки и фильтрации в соответствии с требованиями, которые я вам указал
+                  time:
+                    type: string
+                    format: date-time
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
+                  time:
+                    type: string
+                    format: date-time
+
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -121,14 +162,14 @@ paths:
         content:
           application/xml:
             schema:
-              $ref: "#/components/schemas/Product"
+              $ref: "#/components/schemas/ProductWithoutDate"
       responses:
         '200':
           description: Метод возвращает продукт, которую мы только что создали
           content:
             application/xml:
               schema:
-                $ref: "#/components/schemas/Product"
+                $ref: "#/components/schemas/ProductWithoutDate"
         '400':
           description: Неверные входные данные для продукта
           content:
@@ -145,6 +186,9 @@ paths:
                   message:
                     type: string
                     example: Имя продукта не можем быть пустым !
+                  time:
+                    type: string
+                    format: date-time
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -202,7 +246,27 @@ paths:
                     example: 400
                   message:
                     type: string
-                    example: ID должен быть неотрицательным
+                    example: ID должен быть неотрицательным, также не может быть строкой
+                  time:
+                    type: string
+                    format: date-time
+
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
                   time:
                     type: string
                     format: date-time
@@ -245,7 +309,7 @@ paths:
         content:
           application/xml:
             schema:
-              $ref: "#/components/schemas/Product"
+              $ref: "#/components/schemas/ProductWithoutDate"
 
       responses:
         '200':
@@ -270,6 +334,9 @@ paths:
                   message:
                     type: string
                     example: Имя продукта не должно быть пустым
+                  time:
+                    type: string
+                    format: date-time
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -352,7 +419,7 @@ paths:
 
   #Дополнительные операции
 
-  /products?manufactureCost=<cost>:
+  /products/manufacture-cost/{cost}:
     delete:
       tags:
         - Product ExtraOps
@@ -391,6 +458,25 @@ paths:
                   time:
                     type: string
                     format: date-time
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
+                  time:
+                    type: string
+                    format: date-time
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -413,7 +499,7 @@ paths:
 
 
 
-  /products?max_unitOfMeasure:
+  /products/max-measure:
     get:
       tags:
         - Product ExtraOps
@@ -446,7 +532,7 @@ paths:
                     type: string
                     format: date-time
 
-  /products?MaxAnnualTurnover=<value>:
+  /products/max-annual-turnover/{value}:
     get:
       tags:
         - Product ExtraOps
@@ -485,6 +571,25 @@ paths:
                   time:
                     type: string
                     format: date-time
+        '404':
+          description: Нет данного ресурса
+          content:
+            application/xml:
+              schema:
+                type: object
+                xml:
+                  name: 'answer'
+                properties:
+                  code:
+                    type: integer
+                    format: int64
+                    example: 404
+                  message:
+                    type: string
+                    example: Нет данного ресурса
+                  time:
+                    type: string
+                    format: date-time
         '500':
           description: Внутренняя ошибка сервера
           content:
@@ -513,7 +618,7 @@ components:
       xml:
         name: 'Product'
       properties:
-        product_id:
+        id:
           # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
           type: integer
           nullable: false
@@ -541,7 +646,6 @@ components:
           # Поле не может быть null, Значение этого поля должно генерироваться автоматически
           type: string
           format: date-time
-          example: "2023-09-08T15:31:35.712Z"
           nullable: false
         price:
           # Поле может быть null, Значение поля должно быть больше 0
@@ -614,16 +718,109 @@ components:
                 zipcode:
                   type: string
                   example: 63101
-    Product1:
+
+
+    ProductWithoutDate:
+      type: object
+      xml:
+        name: 'Product'
+      properties:
+        name:
+          # Поле не может быть null, Строка не может быть пустой
+          type: string
+          nullable: false
+          minLength: 1
+          example: Ice cream
+        coordinates:
+          # Поле не может быть null
+          type: object
+          nullable: false
+          properties:
+            x:
+              type: integer
+              nullable: false
+              example: 10
+            y:
+              type: integer
+              nullable: false
+              example: 20
+        price:
+          # Поле может быть null, Значение поля должно быть больше 0
+          type: number
+          nullable: true
+          format: float
+          minimum: 1
+        manufactureCost:
+          # Поле может быть null
+          type: integer
+          format: int64
+          example: 300
+          nullable: true
+        unitOfMeasure:
+          # Поле может быть null
+          type: string
+          nullable: true
+          example: METERS
+          enum:
+            - METERS
+            - SQUARE_METERS
+            - PCS
+            - LITERS
+            - MILLILITERS
+        organization:
+          type: object
+          # Поле не может быть null
+          nullable: false
+          properties:
+            org_id:
+              # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
+              type: integer
+              format: int32
+              example: 3
+              nullable: true
+              minimum: 1
+            name:
+              # Поле не может быть null, Строка не может быть пустой
+              type: string
+              example: "Егор"
+              nullable: false
+              minLength: 1
+            full_name:
+              # Поле не может быть null
+              type: string
+              example: "Егор Кривоносов Дмитриевич"
+              nullable: false
+            annualTurnover:
+              # Поле не может быть null, Значение поля должно быть больше 0
+              type: number
+              format: float
+              nullable: false
+              minimum: 1
+            org_type:
+              # Поле не может быть null
+              type: string
+              example: COMMERCIAL
+              nullable: false
+              enum:
+                - COMMERCIAL
+                - GOVERNMENT
+                - TRUST
+                - PRIVATE_LIMITED_COMPANY
+                - OPEN_JOINT_STOCK_COMPANY
+            postalAddress:
+              # Поле может быть null
+              type: object
+              nullable: true
+              properties:
+                zipcode:
+                  type: string
+                  example: 63101
+
+    ProductWithoutID:
       type: object
       xml:
         name: 'Product1'
       properties:
-        product_id:
-          # Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
-          type: integer
-          nullable: false
-          example: 2
         name:
           # Поле не может быть null, Строка не может быть пустой
           type: string
@@ -647,7 +844,6 @@ components:
           # Поле не может быть null, Значение этого поля должно генерироваться автоматически
           type: string
           format: date-time
-          example: "2023-09-08T15:31:35.712Z"
           nullable: false
         price:
           # Поле может быть null, Значение поля должно быть больше 0
@@ -730,4 +926,3 @@ components:
       items:
         oneOf:
           - $ref: "#/components/schemas/Product"
-          - $ref: "#/components/schemas/Product1"
